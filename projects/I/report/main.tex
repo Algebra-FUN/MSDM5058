@@ -60,7 +60,7 @@ The daily log return of two time series are shown in Fig.~\ref{fig:log_return}.
 \end{figure}
 
 \section{Exponential moving average}
-In order to smooth the data and reduce the noise, we computed the exponential moving average of the log return of each stock.
+In order to smooth the data and reduce the noise, we computed the exponential moving average of the price of each stock.
 
 Define the stock's $\omega$-day exponential moving average (EMA) at time $t$ as
 $$
@@ -395,7 +395,7 @@ our notation by labelling R with only the five alphabets of A; for example, the
 rule R = UUUUU predicts a down after five consecutive ups. There are 3Θ =
 243 possible rules.
 \begin{itemize}
-    \item Divide Y(t) into the “past” and the “future” at $t = M ≈ 3N /4$. We hope to
+    \item Divide Y(t) into the “past” and the “future” at $t = M \approx 3N /4$. We hope to
           get good association rules by examining the history on the previous 3000
           days and then apply them on the coming 1000 days to make a profit.
     \item Calculate the confidence of all the 243 rules in the past, then report the 10
