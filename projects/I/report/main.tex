@@ -1,0 +1,646 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+\usepackage{tabularx}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+
+\begin{document}
+
+\title{Association Rules and Prediction Rules for Financial Data Mining}
+\author{Yifei Fan}
+\authorrunning{Y. Fan}
+\institute{HKUST, Hong Kong SAR, China\\
+    \email{yfanba@ust.hk}}
+\maketitle
+
+\begin{abstract}
+    In this project, we applied association rules and prediction rules to financial data mining.
+    We first downloaded the data and preprocessed the data. 
+    To smooth the data and reduce the noise, we computed the exponential moving average.
+    To figure out the statistical features of the data, we computed the CDF, PDF, and some descriptive statistics.
+    We also carried out the Mean-Variance analysis to find out the minimum-risk portfolio.
+    Then we digitized the time series and split the data into the training set and test set.
+    We found five-day association rules and chose the best 10 rules with the highest confidence using the training set.
+    We compared them with the best 10 rules with the highest profit using the test set to verify the association rules.
+    Finally, we also carried out further analysis and discussion on association rules with different kinds of mean and RPF.\\
+    In conclusion, all of these prove that the designer of this project created a meanless and tedious project, 
+    which is just a step-by-step big homework without learning something new.\\
+    The code of this project is available at \url{https://algebra-fun.github.io/MSDM5058/projects/I/code/}.
+    \keywords{Association Rules  \and Prediction Rules \and Financial Data Mining.}
+\end{abstract}
+
+\section{Data Preprocessing}
+In this project, we downloaded the data of
+daily closing price of the time series of "MSFT" and "GOOGL"
+started from 2005-01-01 to 2023-03-01 from Yahoo Finance~\cite{yahoo_finance}
+using yfinance~\cite{yfinance} package.
+\subsection{Compute log return}
+In order to make the data more suitable for financial data mining,
+we first computed the log return of the closing price of each stock.
+
+Let time start at $t = 0$. Denote the stock's time series by $S(t)$, then compute its daily log return $X(t)$ with
+
+\begin{equation}
+    X(t) = ln \left[\frac{S(t)}{S(t-1)}\right].
+\end{equation}
+
+The daily log return of two time series are shown in Fig.~\ref{fig:log_return}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{../img/log_return.pdf}
+    \caption{Daily log return of two stocks.}
+    \label{fig:log_return}
+\end{figure}
+
+\section{Exponential moving average}
+In order to smooth the data and reduce the noise, we computed the exponential moving average of the log return of each stock.
+
+Define the stock's $\omega$-day exponential moving average (EMA) at time $t$ as
+$$
+    M(t, \omega) = aS(t) + (1 - a)M(t - 1, \omega)
+$$
+for some smoothing constant $a$. The base case is $M(0, \omega) ≡ S(0)$.
+
+\subsection{First case $a=1/\omega$}
+
+In first case, we set $a = 1/\omega$ and compute the $\omega$-day EMA of the log return of each stock.
+The plots are shown in Fig.~\ref{fig:ema1}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{../img/ema1.pdf}
+    \caption{Exponential moving average of two stocks in first case.}
+    \label{fig:ema1}
+\end{figure}
+
+\subsection{Second case $a=2/(\omega + 1)$}
+
+In second case, we set $a = 2/(\omega + 1)$ and compute the $\omega$-day EMA of the log return of each stock.
+The plots are shown in Fig.~\ref{fig:ema2}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{../img/ema2.pdf}
+    \caption{Exponential moving average of two stocks in second case.}
+    \label{fig:ema2}
+\end{figure}
+
+\subsection{Discussion on effect of parameter $\omega$ and $a$}
+
+The parameter $a$ is the smoothing constant. The larger the value of $a$ is, the more weight is given to the most recent data point.
+Then curve of the EMA will be more unsmoothed since the most recent data point contributes more noise to EMA.
+
+In both first case and second, the $a$ is always in inverse proportion to $\omega$. Then when $\omega$ is larger, the value of $a$ is smaller so that the curve of the EMA will be more smoothed.
+
+Meanwhile, we call the EMA as $\omega$-day EMA since the value is similar as the average of the $\omega$-day stock prices.
+The larger the value of $\omega$ is, the more data points are used to compute the EMA. Then the curve of the EMA will be more smoothed.
+
+\section{Cumulative Distribution Function}
+
+In order to figure out the distribution of the log return of each stock, we computed the  cumulative distribution function (CDF) of the log return of each stock.
+
+The ECDF of the log return of each stock is shown in Fig.~\ref{fig:ecdf}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{../img/ecdf.pdf}
+    \caption{ECDF of two stocks.}
+    \label{fig:ecdf}
+\end{figure}
+
+
+From the plot, we can see that the distribution curve looks like a normal distribution curve.
+Then we deside to use the logistic function to fit the curve.
+
+\subsection{Logistic function}
+We may fit $F_X (x)$ with a logistic function
+\begin{equation}
+    L(x) = \frac1{1 + \exp[-b(x-x^*)]}
+\end{equation}
+In physics, this is also called a Fermi-Dirac distribution.
+\subsubsection*{What is $L(x^*)$ and hence your empirical $x^*$?}
+$$
+    L(x^*) = \frac12 .
+$$
+
+Thus, $x^*=L^{-1}(\frac12)=F_X^{-1}(\frac12)=quantile(X,\frac12)$.
+\subsubsection*{What is $L^{'}(x^*)$ and hence your empirical $b$?}
+$$
+    L^{'}(x) = \frac{b\exp[-b(x-x^*)]}{(1+\exp[-b(x-x^*)])^2} .
+$$
+$$
+    L^{'}(x^*) = \frac{b}{4} .
+$$
+
+Thus, $b=4L^{'}(x^*)=4F_X^{'}(x^*)\approx 4\frac{F_X(x^*+\delta x)-F_X(x^*-\delta x)}{2\delta x}$.
+
+\subsubsection*{Plot the empirical $L(x)$ atop $F_X(x)$}
+
+\hfill\\
+The plot is shown in Fig.~\ref{fig:logistic}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{../img/logistic_fit.pdf}
+    \caption{Empirical $L(x)$ atop $F_X(x)$}
+    \label{fig:logistic}
+\end{figure}
+
+From the plot, we can see that the logistic function fits the distribution curve well.
+
+\subsection{Kolmogorov-Smirnov Test}
+
+In order to check whether the logistic function fits the distribution curve well, we use the Kolmogorov-Smirnov test.
+
+We can test if our fitting is good with the Kolmogorov-Smirnov test. Our null
+hypothesis is that $L(x)$ fits $F_X (x)$ well. Define $D = \max_x֓|F_X(x) - L(x)|$.
+If $\sqrt{N} D > \eta_{\alpha}$ , we reject the null hypothesis at a significance level $\alpha$. The
+threshold $\eta_{\alpha}$ solves
+$$
+    \frac{\sqrt{2\eta_{\alpha}}}{\eta_{\alpha}}\sum_{k=1}^{\infty}\exp\left[-\frac{(2k-1)^2\pi^2}{8\eta_{\alpha}^2}\right]=1-\alpha.
+$$
+
+In this project, we just calculate the $\eta_{\alpha}$ with help of the function "kolmogi"~\cite{kolmogi} from "scipy" package.
+
+\subsubsection*{Does the test reject the null hypothesis at $\alpha$ = 0.05?}
+
+\hfill\\
+The output of the KS-Test is shown below:
+
+\begin{itemize}
+    \item MSFT:\\
+    Accept the null hypothesis at $\alpha=0.05 (\sqrt{N}D=0.1273,\eta_{\alpha}=0.5196)$.
+    \item GOOGL:\\
+    Accept the null hypothesis at $\alpha=0.05 (\sqrt{N}D=0.1375,\eta_{\alpha}=0.5196)$.
+\end{itemize}
+
+\noindent The KS-Test shows that the logistic function fits the distribution curve well, both for MSFT and GOOGL.
+
+\section{Probability Density Function}
+
+In order to figure out the probability density function of the log return of each stock, we computed the probability density function of the log return of each stock.
+
+We can estimate X's PDF $F_X(x)$ with the derivative of its fitted
+CDF. On the other hand, we can estimate $F_X(x)$ with a $k$-bin normalized his-
+togram, where each bin is $h = (\max x - \min x)/k$ units wide. In general, the
+ith bin measures the frequency of $x \in [\min x + (i - 1)h, \min x + ih)$.
+
+\begin{itemize}
+    \item Plot $L^{'}(x)$ for $L(x)$ fitted in last section.
+    \item Plot three $k$-bin histograms for $k = 20, 100$, and $400$.
+\end{itemize}
+
+The plot is shown in Fig.~\ref{fig:epdf}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{../img/epdf.pdf}
+    \caption{Empirical PDF}
+    \label{fig:epdf}
+\end{figure}
+
+\subsection{Discussion on the effect of $k$}
+
+The larger the $k$ is, the more accurate the histogram is, since the histogram is more smooth and the bar is more close to the definition of density.
+However, the larger the $k$ is, the more bins there are, which means the more computation is needed.
+
+\section{Descriptive Statistics}
+
+In order to find the feature of Statistics of the log return of each stock, we computed the mean, variance, sharp-ratio of the log return of each stock.
+
+We compute the two return rates' all-time means $\{\mu_1, \mu_2\}$, variances $\{\sigma_1^2, \sigma_2^2\}$
+Sharpe ratios $\{\gamma_1, \gamma_2\}$. These statistics are shown in Table.~\ref{tab:stats1}\\
+And the covariance $\sigma_{12}=0.000195$.
+
+\begin{table}
+    \centering
+    \caption{The mean, variance, sharp-ratio of each stock(all-time).}
+    \label{tab:stats1}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|}
+        \hline
+              & Mean     & Variance & Sharpe Ratio \\
+        \hline
+        MSFT  & 0.000566 & 0.000302 & 0.032541     \\
+        GOOGL & 0.000630 & 0.000359 & 0.033221     \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+In order to see whether the time series is stationary along the time(i.e. the statistics don't rely on time variable), we computed these statistics only using the data on the $K$ most recent days
+
+\begin{itemize}
+    \item When $k=30$, the statistics of each stock are shown in Table.~\ref{tab:stats2}. And the covariance $\sigma_{12}=0.000409$.
+    \item When $k=100$, the statistics of each stock are shown in Table.~\ref{tab:stats3}. And the covariance $\sigma_{12}=0.000514$.
+    \item When $k=300$, the statistics of each stock are shown in Table.~\ref{tab:stats4}. And the covariance $\sigma_{12}=0.000438$.
+\end{itemize}
+
+\begin{table}
+    \centering
+    \caption{The mean, variance, sharp-ratio of each stock($k=30$).}
+    \label{tab:stats2}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|}
+        \hline
+              & Mean      & Variance & Sharpe Ratio \\
+        \hline
+        MSFT  & 0.001474  & 0.00041  & 0.072799     \\
+        GOOGL & -0.000754 & 0.00088  & -0.025415    \\
+        \hline
+    \end{tabularx}
+\end{table}
+\begin{table}
+    \centering
+    \caption{The mean, variance, sharp-ratio of each stock($k=100$).}
+    \label{tab:stats3}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|}
+        \hline
+              & Mean      & Variance & Sharpe Ratio \\
+        \hline
+        MSFT  & 0.000075  & 0.000554 & 0.003179     \\
+        GOOGL & -0.001210 & 0.000704 & -0.045574    \\
+        \hline
+    \end{tabularx}
+\end{table}
+\begin{table}
+    \centering
+    \caption{The mean, variance, sharp-ratio of each stock($k=300$).}
+    \label{tab:stats4}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|}
+        \hline
+              & Mean      & Variance & Sharpe Ratio \\
+        \hline
+        MSFT  & -0.000842 & 0.000474 & -0.038648    \\
+        GOOGL & -0.001575 & 0.000594 & -0.064624    \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Mean-Variance Analysis}
+
+We would like to perform a mean-variance analysis on $X_1(t)$ and $X_2(t)$ and
+accordingly construct the minimum-risk portfolio $S_p(t) = pS_1(t)+(1-p)S_2(t)$  for some fraction of investment $p\in[0, 1]$.
+We determine $p$ according to the stocks' all-time statistics by minimize the risk of the portfolio $S_p(t)$.
+Then we get the optimal $p=0.60467981$ and the portfolio $S_p(t)=0.6047S_1(t)+0.3953S_2(t)$.
+
+The plot of the portfolio $S_p(t)$ is shown in Fig.~\ref{fig:portfolio}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{../img/min_risk.pdf}
+    \caption{The resultant portfolio's $S_p(t)$ atop $S_1(t)$ and $S_2(t)$.}
+    \label{fig:portfolio}
+\end{figure}
+
+From the plot, we can see that although the portfolio $S_p(t)$ is not as benefit as $S_1(t)$, it indeed reduces the risk.
+
+\subsection{A K-Day Analysis}
+As the relevance of old data should decay, it is more sensible to consider the
+stocks' performance on the K most recent days only. In other words, we only
+infer information from $\{X(t-\tau)|\tau\in(0,K-1)\}$ at every moment $t$.
+
+Hence, the fraction of investment, now denoted by $p(t, K)$, varies with time
+and depends on K. Complete the following tasks for $K = 30, 100, and 300$.
+
+\begin{itemize}
+    \item Compute $p(t, K)$.
+    \item Compute the resultant portfolio $S_p(t,K)$ atop $S_1(t)$ and $S_2(t)$
+    \item Compute $S_p(t,K)$'s K-day Sharpe ratio $\gamma_p(t,K)=\mu_p(t,K)/\sigma_p(t,K)$.
+\end{itemize}
+
+The plot is shown in Fig.~\ref{fig:portfolio_k}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{../img/k_day_analysis.pdf}
+    \caption{The K-Day Analysis}
+    \label{fig:portfolio_k}
+\end{figure}
+
+\subsubsection*{Discussion on the effect of $K$ on the portfolio's performance}
+\hfill\\
+From the plot, we can see that the stock log return of the portfolio $S_p(t,K)$ is more stable when $K$ is larger.
+However, the sharp-ratio $\gamma_p(t,K)$ is smaller when $K$ is larger.
+Which means that when $K$ is larger, although risk is reduced, the benefit is also reduced, leading to the reduction on shart-ratio.
+
+\section{Digitization of Time Series}
+Now focus on the first stock, so its subscript “1” is hereafter dropped and
+implied. Digitize X(t) as Y(t) with three alphabets, viz. D for “down”, U for
+“up”, and H for “hold”.
+\begin{equation}
+    Y(t)=
+    \begin{cases}
+        D, & X(t)<-\epsilon, \\
+        U, & X(t)>+\epsilon, \\
+        H, & otherwise.
+    \end{cases}
+\end{equation}
+Here let us use $\epsilon = 0.002$, whereas you may of course choose other values in
+real applications.
+\subsection*{Calculate the probability $P[Y(t)=y]$ for $y \in \{D, U, H\}$}
+
+The result is shown in Table~\ref{tab:p}.
+
+\begin{table}
+    \centering
+    \caption{The probability $P[Y(t)=y]$ for $y \in \{D, U, H\}$}
+    \label{tab:p}
+    \begin{tabularx}{\textwidth}{|C|C|}
+        \hline
+          & probability \\
+        \hline
+        U & 0.438827    \\
+        D & 0.408186    \\
+        H & 0.152988    \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsection*{Calculate the conditional probability $P[Y(t+1)=y_1|Y(t)=y_2]$ for all
+    nine possible pairs of $(y_1,y_2) \in \{D, U, H\} \times \{D, U, H\}$}
+
+The result is shown in Table~\ref{tab:p12}.
+
+\begin{table}
+    \centering
+    \caption{The conditional probability $P[Y(t+1)=y_1|Y(t)=y_2]$.}
+    \label{tab:p12}
+    \begin{tabularx}{\textwidth}{|C|C|C|}
+        \hline
+        $y_1$ & $y_2$ & probability \\
+        \hline
+        D     & U     & 0.432918    \\
+        U     & D     & 0.455764    \\
+        U     & U     & 0.413965    \\
+        D     & D     & 0.398928    \\
+        U     & H     & 0.464950    \\
+        H     & U     & 0.152618    \\
+        H     & D     & 0.145308    \\
+        D     & H     & 0.360515    \\
+        H     & H     & 0.174535    \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Association Rules}
+We would like to find out a five-day pattern A that associates well with an
+immediate down (D). Formally, a rule R can be written as
+R : A = {Y(t - 4), Y(t - 3), Y(t - 2), Y(t - 1), Y(t)} → Y(t + 1) = D (6)
+or just R : A → D. Since the consequence of R is always D, we may simplify
+our notation by labelling R with only the five alphabets of A; for example, the
+rule R = UUUUU predicts a down after five consecutive ups. There are 3Θ =
+243 possible rules.
+\begin{itemize}
+    \item Divide Y(t) into the “past” and the “future” at $t = M ≈ 3N /4$. We hope to
+          get good association rules by examining the history on the previous 3000
+          days and then apply them on the coming 1000 days to make a profit.
+    \item Calculate the confidence of all the 243 rules in the past, then report the 10
+          rules with the highest confidence. Denote them as $\{R_{conf}\}_p$.
+\end{itemize}
+
+The result is shown in Table~\ref{tab:conf}.
+
+\begin{table}
+    \centering
+    \caption{The 10 most confident rules $\{R_{conf}\}_p$.}
+    \label{tab:conf}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|C|C|}
+        \hline
+        $y_{t}$ & $y_{t-1}$ & $y_{t-2}$ & $y_{t-3}$ & $y_{t-4}$ & probability \\
+        \hline
+        U       & D         & D         & H         & H         & 1.000000    \\
+        U       & D         & H         & H         & H         & 1.000000    \\
+        D       & H         & H         & D         & H         & 1.000000    \\
+        H       & U         & H         & D         & H         & 1.000000    \\
+        H       & U         & H         & H         & H         & 1.000000    \\
+        D       & D         & H         & H         & H         & 1.000000    \\
+        H       & D         & H         & D         & U         & 0.833333    \\
+        U       & D         & H         & U         & H         & 0.800000    \\
+        D       & D         & H         & D         & H         & 0.800000    \\
+        U       & H         & D         & D         & U         & 0.785714    \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\section{Verification of Association Rules}
+We may verify a rule's goodness by doing a betting experiment with the future data like this: as time passes, we bet on an immediate down every day.
+If a down indeed comes out, we earn $u$, and we ascribe the profit to the just appeared five-day pattern A and its rule R:A → D; otherwise, we lose $v$,
+and we similarly ascribe the loss to the just appeared pattern.
+Consider $u = 1$ and $v = 0$ for simplicity. In this regard, a rule's profit is merely the number of times that it works.
+Record the profits due to all the 243 rules.
+\subsection*{Find the 10 most profitable rules. Denote them as $\{R_{expt}\}_f$.}
+The result is shown in Table~\ref{tab:expt}.
+\begin{table}
+    \centering
+    \caption{The 10 most profitable rules $\{R_{expt}\}_f$.}
+    \label{tab:expt}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|C|C|}
+        \hline
+        $y_{t}$ & $y_{t-1}$ & $y_{t-2}$ & $y_{t-3}$ & $y_{t-4}$ & profit \\
+        \hline
+        U       & U         & D         & D         & U         & 14     \\
+        U       & D         & D         & U         & U         & 12     \\
+        U       & D         & U         & U         & U         & 12     \\
+        U       & U         & U         & U         & D         & 12     \\
+        D       & U         & D         & U         & U         & 11     \\
+        U       & U         & U         & U         & U         & 10     \\
+        U       & U         & D         & U         & U         & 10     \\
+        D       & U         & U         & D         & U         & 9      \\
+        U       & D         & U         & D         & D         & 9      \\
+        U       & U         & D         & U         & D         & 9      \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsection*{How many rules does $\{R_{conf}\}_p$ share with $\{R_{expt}\}_f$?}
+
+Unfortunately, none of the 10 most confident rules $\{R_{conf}\}_p$ share with the 10 most profitable rules $\{R_{expt}\}_f$.
+
+This result is not surprising. The confidence of a rule is merely the number of times that it works in the past. It does not guarantee that the rule will work in the future.
+Meanwhile in this simplified setting $u=1$ and $v=0$, there is not punishment for a wrong prediction. Thus the most profitable rules may be the rule with low confidence but high support.
+The reason those rules are profitable is that they have a high support, which means the higher support they have, the more time they can win and get more profit.
+
+In conclusion, the poor setting $u=1$ and $v=0$ leads to this bad result. If we want to get a good result, we should set $u$ and $v$ to be more realistic values.
+
+\subsection*{Compute the correlation between a rule's confidence in the past and its
+    profit in the future.}
+
+The result is only $0.003803$, a very low correlation.
+
+\subsection*{Discussion on the discrepancies between $\{R_{conf}\}_p$ and $\{R_{expt}\}_f$. What are the
+    potential flaws of assessing a rule with its confidence?
+}
+
+Actually, there is all discrepancies between $\{R_{conf}\}_p$ and $\{R_{expt}\}_f$. They don't share any common rule.
+
+As we discussion above, the poor setting $u=1$ and $v=0$ leads to this bad result.
+
+The flaws is quite obvious.
+
+\begin{itemize}
+    \item The confidence of a rule is merely the number of times that it works in the past. It does not guarantee that the rule will work in the future.
+    \item Only higher confidence can't guarantee profitable in the future. We should consider the support of a rule. Only a rule with higher support and higher confidence can have a higher chance gain more profit in the future.
+\end{itemize}
+
+\section{Further Analysis of Association Rules}
+
+\subsection{Geometric mean and Arithmetic Mean}
+Let us first boldly assume that all rules obey $s_p= s_f$ and $c_p= c_f$ , yielding $\pi\sim s_pc_p$. Since the ranking of 𝜋 does not change when we take a square root on the right-hand side, we may predict a rule’s goodness with the geometric mean between its support and confidence. Out of curiosity, we may also guess whether their arithmetic mean is useful.
+\subsubsection*{Report the 10 rules with the highest geometric mean between support and confidence in the past, i.e. $\sqrt{s_p c_p}$. Denote them as $\{R_{geo}\}_p$.}
+\hfill\\
+The result is shown in Table~\ref{tab:geo}.
+\begin{table}
+    \centering
+    \caption{The 10 rules with the highest geometric mean between support and confidence in the past.}
+    \label{tab:geo}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|C|C|}
+        \hline
+        $y_{t}$ & $y_{t-1}$ & $y_{t-2}$ & $y_{t-3}$ & $y_{t-4}$ & geometric mean \\
+        \hline
+        D       & U         & D         & D         & U         & 5.385165       \\
+        D       & U         & U         & D         & U         & 5.291503       \\
+        U       & U         & D         & U         & U         & 5.291503       \\
+        D       & U         & D         & D         & D         & 5.196152       \\
+        U       & D         & D         & U         & D         & 5.196152       \\
+        U       & D         & D         & D         & U         & 5.099020       \\
+        U       & D         & U         & D         & U         & 5.099020       \\
+        D       & D         & U         & D         & D         & 5.000000       \\
+        U       & D         & D         & U         & D         & 4.898979       \\
+        U       & U         & D         & D         & D         & 4.690416       \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection*{Report the 10 rules with the highest arithmetic mean between support and confidence in the past, i.e. $\frac{s_p+c_p}2$. Denote them as $\{R_{ari}\}_p$.}
+\hfill\\
+The result is shown in Table~\ref{tab:ari}.
+\begin{table}
+    \centering
+    \caption{The 10 rules with the highest arithmetic mean between support and confidence in the past.}
+    \label{tab:ari}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|C|C|}
+        \hline
+        $y_{t}$ & $y_{t-1}$ & $y_{t-2}$ & $y_{t-3}$ & $y_{t-4}$ & arithmetic mean \\
+        \hline
+        D       & U         & D         & D         & U         & 30.737705       \\
+        U       & D         & U         & D         & U         & 30.713115       \\
+        D       & U         & U         & D         & U         & 30.233333       \\
+        D       & D         & U         & D         & D         & 29.711864       \\
+        U       & D         & D         & D         & U         & 28.232143       \\
+        U       & D         & D         & U         & D         & 27.745455       \\
+        U       & U         & D         & U         & U         & 26.764151       \\
+        U       & U         & D         & U         & D         & 26.698113       \\
+        D       & U         & D         & U         & D         & 25.170000       \\
+        U       & U         & D         & D         & D         & 24.724490       \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection*{How many rules do $\{R_{geo}\}_p$ and $\{R_{ari}\}_p$ share with $\{R_{expt}\}_f$ ? Do the two means assess a rule better than confidence?}
+
+\begin{equation}
+    \label{eq:geo_ari}
+    \begin{aligned}
+        \{R_{ari}\}_p\cup \{R_{expt}\}_f & = \{(D, U, U, D, U),(U, U, D, U, D),(U, U, D, U, U)\} \\
+        \{R_{geo}\}_p\cup \{R_{expt}\}_f & = \{(D, U, U, D, U), (U, U, D, U, U)\}
+    \end{aligned}
+\end{equation}
+
+From \eqref{eq:geo_ari}, we can see that the number of shared rules between $\{R_{geo}\}_p$ and $\{R_{expt}\}_f$ is only 2, while the number of shared rules between $\{R_{ari}\}_p$ and $\{R_{expt}\}_f$ is 3.
+Both of the number of shared rules is bigger than the confidence's which is 0.
+Therefore, we can conclude that both the arithmetic mean and geometric mean assess a rule better than the confidence since they consider the effect of support.
+However, we still can't conclude that the arithmetic mean assesses a rule better than the geometric mean since the geometric mean is more theoretical senseable than the arithmetic mean.
+
+\subsection{A Generalized Mean}
+Now we will account for the discrepancy between the past and the future, so $s_p\neq s_f$ and $c_p\neq c_f$. We are pessimistic, so we expect that a rule's confidence depreciates over time, but we are also optimistic, so we expect that a more confident rule in the past remains more confident in the future.
+The two assumptions combine to suggest $c_f=c_p^m$ for some $m > 1$. With the scale of $\pi$ maintained, we may formulate $\pi$ with a generalized mean
+$$
+    \pi=(s_pc_p^m)^{\frac1{1+m}}=s_p^\lambda c_p^{1-\lambda}
+$$
+for some tuning parameter $\lambda \equiv  1/(1 + m) \in [0, 1]$.
+As $\lambda$ rises, the emphasis of $s_p^\lambda c_p^{1-\lambda}$ smoothly slides from support to confidence.
+When $\lambda$ strikes 1/3,$\pi=\sqrt[3]{s_pc_p^2}=\sqrt[3]{r_p}$, where $r_p$ is the rule's rule power factor (RPF).
+
+\subsubsection*{Report the 10 rules with the highest RPF in the past. Denote them as $\{R_{RPF}\}_p$.}
+\hfill\\
+The result is shown in Table~\ref{tab:rpf}.
+\begin{table}
+    \centering
+    \caption{The 10 rules with the highest RPF in the past.}
+    \label{tab:rpf}
+    \begin{tabularx}{\textwidth}{|C|C|C|C|C|C|}
+        \hline
+        $y_{t}$ & $y_{t-1}$ & $y_{t-2}$ & $y_{t-3}$ & $y_{t-4}$ & RPF      \\
+        \hline
+        D       & U         & D         & D         & D         & 2.476445 \\
+        U       & U         & D         & U         & U         & 2.454785 \\
+        D       & U         & D         & D         & U         & 2.397850 \\
+        U       & D         & D         & U         & D         & 2.366582 \\
+        D       & U         & U         & D         & U         & 2.355347 \\
+        U       & D         & D         & U         & U         & 2.335360 \\
+        U       & D         & D         & D         & U         & 2.293962 \\
+        D       & D         & U         & U         & D         & 2.289428 \\
+        U       & D         & U         & D         & U         & 2.229490 \\
+        D       & D         & U         & D         & D         & 2.196221 \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection*{How many rules does $\{R_{RPF}\}_p$ share with $\{R_{expt}\}_f$ ? Hence, does RPF assess a rule better than confidence?}
+
+\begin{equation}
+    \label{eq:rpf_expt}
+    \begin{aligned}
+        \{R_{RPF}\}_p\cup \{R_{expt}\}_f & = \{(D, U, U, D, U),(U, D, D, U, U),(U, U, D, U, U)\}
+    \end{aligned}
+\end{equation}
+
+From \eqref{eq:rpf_expt}, we can see that the number of shared rules between $\{R_{RPF}\}_p$ and $\{R_{expt}\}_f$ is 3, which is bigger than the confidence's which is 0. 
+Therefore, we can conclude that RPF assesses a rule better than the confidence since it considers the effect of support and meanwhile using $c_f=c_p^2$ to predict the confidence in the future.
+
+
+\subsubsection*{Do you think there will be an optimal value for $\lambda$ that best predict a rule's goodness? If yes, what may it be? If no, why not?}
+
+\hfill\\
+In my opinion, there will be an optimal value for $\lambda$ that best predict a rule's goodness in this practical application for specified data but there is no evidence in theory.
+
+We carry out the experiment with $\lambda=linspace(0,1,101)$ to find out the best $\lambda$ for this task.
+
+Then the optimal $\lambda$ we found is $1/4$. When $\lambda=1/4$, the number of shared rules between $\{R_{\lambda=1/4}\}_p$ and $\{R_{expt}\}_f$ is 4, which is bigger than 3. 
+Then we conclude that the optimal $\lambda$ is $1/4$, which is better than the RPF setting $\lambda=1/3$.
+
+The shared rules are shown in \eqref{eq:lambda_expt}.
+
+\begin{equation}
+    \label{eq:lambda_expt}
+    \begin{aligned}
+        \{R_{\lambda=1/4}\}_p\cup \{R_{expt}\}_f & = \{(D,U,U,D,U),(U,D,D,U,U),\\
+        &(U,U,D,U,U),(U,U,U,U,U)\}
+    \end{aligned}
+\end{equation}
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+% \bibliographystyle{splncs04}
+% \bibliography{mybibliography}
+%
+\begin{thebibliography}{8}
+    \bibitem{yahoo_finance}
+    Yahoo! Finance, \url{https://finance.yahoo.com/}, last accessed 2023/04/15.
+
+    \bibitem{yfinance}
+    yfinance, \url{https://pypi.org/project/yfinance/}, last accessed 2023/04/15.
+
+    \bibitem{kolmogi}
+    scipy.special.kolmogi, \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.kolmogi.html}, last accessed 2023/04/15.
+
+\end{thebibliography}
+\end{document}

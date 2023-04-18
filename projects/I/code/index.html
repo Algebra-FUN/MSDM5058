@@ -15397,7 +15397,7 @@ $$</p>
     <span class="n">x_star</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">logistic_fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">stock</span><span class="p">],</span><span class="n">dx</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
     <span class="n">L</span> <span class="o">=</span> <span class="n">logistic</span><span class="p">(</span><span class="n">x_range</span><span class="p">,</span><span class="n">x_star</span><span class="o">=</span><span class="n">x_star</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">)</span>
     <span class="n">result</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">eta</span> <span class="o">=</span> <span class="n">ks_f</span><span class="p">(</span><span class="n">FX</span><span class="p">,</span><span class="n">L</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
-    <span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">stock</span><span class="si">}</span><span class="s2">) KS-Test: </span><span class="si">{</span><span class="s1">&#39;reject&#39;</span> <span class="k">if</span> <span class="n">result</span> <span class="k">else</span> <span class="s1">&#39;accept&#39;</span><span class="si">}</span><span class="s2"> the null hypothesis at $\alpha=</span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s2">$ ($\eta_</span><span class="se">{{</span><span class="s2">\alpha</span><span class="se">}}</span><span class="s2">=</span><span class="si">{</span><span class="n">eta</span><span class="si">}</span><span class="s2">$)&quot;</span><span class="p">))</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">stock</span><span class="si">}</span><span class="s2">) KS-Test: </span><span class="si">{</span><span class="s1">&#39;reject&#39;</span> <span class="k">if</span> <span class="n">result</span> <span class="k">else</span> <span class="s1">&#39;accept&#39;</span><span class="si">}</span><span class="s2"> the null hypothesis at $\alpha=</span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s2">$ ($\sqrt</span><span class="se">{{</span><span class="s2">N</span><span class="se">}}</span><span class="s2">D=</span><span class="si">{</span><span class="n">stats</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,\eta_</span><span class="se">{{</span><span class="s2">\alpha</span><span class="se">}}</span><span class="s2">=</span><span class="si">{</span><span class="n">eta</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">$)&quot;</span><span class="p">))</span>
 </pre></div>
 
      </div>
@@ -15419,7 +15419,7 @@ $$</p>
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<p>(MSFT) KS-Test: accept the null hypothesis at $\alpha=0.05$ ($\eta_{\alpha}=0.5196103791686225$)</p>
+<p>(MSFT) KS-Test: accept the null hypothesis at $\alpha=0.05$ ($\sqrt{N}D=0.1273,\eta_{\alpha}=0.5196$)</p>
 
 </div>
 
@@ -15432,7 +15432,7 @@ $$</p>
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output " data-mime-type="text/markdown">
-<p>(GOOGL) KS-Test: accept the null hypothesis at $\alpha=0.05$ ($\eta_{\alpha}=0.5196103791686225$)</p>
+<p>(GOOGL) KS-Test: accept the null hypothesis at $\alpha=0.05$ ($\sqrt{N}D=0.1375,\eta_{\alpha}=0.5196$)</p>
 
 </div>
 
