@@ -210,6 +210,7 @@ $$
 $$
 
 Then set the gradient to be zero and solve for $\alpha$ and $\beta$, get the solution of extremum set: 
+
 $$
 (\alpha, \beta) \in \{\alpha+\beta=1\}.
 $$
@@ -224,7 +225,7 @@ From the analysis and the plot, we can see that the mutual information is maxima
 
 ### (f) What condition do $(\alpha, \beta)$ satisfy when the capacity of this channel is minimal? What is the channel capacity in that case?
 
-From the analysis and the plot, ist's easy to see that when $\alpha+\beta=1$, the mutual information is minimal. The capacity is $0$ bit.
+From the analysis and the plot, we can see that when $\alpha+\beta=1$, the mutual information is minimal. The capacity is $0$ bit.
 
 ## (4) Principle of Maximum Entropy
 
