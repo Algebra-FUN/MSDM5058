@@ -1,0 +1,473 @@
+\documentclass[runningheads]{llncs}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage[lighttt]{lmodern}
+\usepackage{url}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath}
+% Define a custom color
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+\begin{document}
+\title{MSDM5058 Information Science\\
+    Computational Project II:\\
+    Portfolio Management Using Prediction Rules\\
+    and Communication in Social Networks}
+\titlerunning{MSDM5058 Project II}
+\author{Yifei Fan}
+\authorrunning{Y. Fan}
+\institute{HKUST, Hong Kong SAR, China\\
+    \email{\href{yfanba@ust.hk}{yfanba@ust.hk}}}
+\maketitle
+
+\begin{abstract}
+    In this project, we applied prediction rules and communication in social networks carry out portfolio management and financial data mining.
+    We first downloaded the data and preprocessed the data.
+    The code of this project is available at \url{https://algebra-fun.github.io/MSDM5058/projects/II/}.
+    \keywords{Prediction Rules \and Communication in Social Networks \and Portfolio Management.}
+\end{abstract}
+
+
+\section{Data Preprocessing}\label{sec:1}
+
+In this project, we downloaded the data of
+daily closing price of the time series of "GOOGL"~\cite{goolge}
+started from 2007-01-01 to 2023-04-10 from Yahoo Finance
+using yfinance~\cite{yfinance} package.
+\subsection{Compute log return}
+In order to make the data more suitable for financial data mining,
+we first computed the log return of the closing price of each stock.
+
+Let time start at $t = 0$. Denote the stock's time series by $S(t)$, then compute its daily log return $X(t)$ with
+
+\begin{equation}
+    X(t)=\ln \left[\frac{S(t)}{S(t-1)}\right].
+\end{equation}
+
+\begin{figure}[!htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../code/img/q1_SX.pdf}
+    \end{center}
+    \caption{}
+    \label{fig:q1sx}
+\end{figure}
+
+\begin{figure}[!htbp]
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include first image
+        \includegraphics[width=\linewidth]{../code/img/q1_acf.pdf}
+        \caption{Auto-correlation function with 50 days' lag.}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include second image
+        \includegraphics[width=\linewidth]{../code/img/q1_pacf.pdf}
+        \caption{Partial auto-correlation function with 50 days' lag.}
+    \end{subfigure}
+    \caption{Auto-correlation function and partial auto-correlation function of the daily return.}
+    \label{fig:q1acf}
+\end{figure}
+
+
+\begin{align}
+    Y(t)=\left\{
+    \begin{array}{ll}
+        \text { D, } & \text { if } X(t)<-\varepsilon \\
+        \text { U, } & \text { if } X(t)>+\varepsilon \\
+        \text { H, } & \text { else }
+    \end{array}
+    \right.
+\end{align}
+where $\varepsilon=0.03$.
+
+
+\section{Cumulative Distribution Function}\label{sec:2}
+In this section, we plot the conditional CDF of $X$ given that $Y$ will become U and D one day later, which are denoted as
+\begin{align}
+    F_U(x) & = \text{CDF}[X(t)=x|Y(t+1)=U], \\
+    F_D(x) & = \text{CDF}[X(t)=x|Y(t+1)=D].
+\end{align}
+
+
+
+\begin{figure}[!htb]
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../code/img/q2.pdf}
+    \end{center}
+    \caption{ Cumulative distribution function of $X$ given that $Y$ will become U and D one day later.}
+    \label{fig:q2}
+\end{figure}
+
+
+\section{Probability Density Function}\label{sec:3}
+
+
+\begin{figure}[!htb]
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../code/img/q3_dist.pdf}
+    \end{center}
+    \caption{Density plot of conditional PDFs}
+    \label{fig:q3}
+\end{figure}
+
+The logistic function is defined as
+\begin{equation}
+    L(x)=\frac{1}{1+e^{-b(x-x^*)}},
+\end{equation}
+where $x^*$ is the inflection point and $b$ is the slope. The gaussian function is defined as
+\begin{equation}
+    G(x)=\frac{1}{\sigma \sqrt{2 \pi}} \exp \left[-\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right],
+\end{equation}
+where $\mu$ is the mean and $\sigma$ is the standard deviation.
+
+
+
+
+\section{Bayes Detector}\label{sec:4}
+
+
+\begin{figure}[!htbp]
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include first image
+        \includegraphics[width=\linewidth]{../code/img/q4_ld.pdf}
+        \caption{Logistic function}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include second image
+        \includegraphics[width=\linewidth]{../code/img/q4_gau.pdf}
+        \caption{Gaussian function}
+    \end{subfigure}
+    \caption{Bayes detector with different conditional PDFs. The red vertical line is the threshold.}
+    \label{fig:q4}
+\end{figure}
+
+
+\section{Association Rules}\label{sec:5}
+
+
+
+
+The result is shown in Table~\ref{tab:5}.
+\begin{table}[!htbp]
+    \centering
+    \caption{Best Association Rules}
+    \label{tab:5}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Days} & \textbf{Upward Rule} & \textbf{Downward Rule} \\ \hline
+        1             & U                    & D                      \\ \hline
+        5             & HUDHH                & HHHDD                  \\ \hline
+    \end{tabular}
+\end{table}
+
+
+\section{Portfolio Management}\label{sec:6}
+
+\begin{equation}
+    V(t)=M(t)+N(t)S(t).
+\end{equation}
+
+If Bayes detector predicts $Y(t+1)$ is U and the antecedent of the best $k$-day upward rule $R_U$ occurs on day $t$, we buy shares to get
+\begin{equation}\label{eq:61}
+    \left\{\begin{array}{l}
+        M(t) \quad \leftarrow M(t)-m \\
+        N(t) \quad \leftarrow N(t)+m / S(t) \quad \text { for } \quad m=\gamma M(t) .
+    \end{array}\right.
+\end{equation}
+Else if Bayes detector predicts $Y(t+1)$ is D and the antecedent of the best $k$-day downward rule $R_D$ occurs on day $t$, we sell shares to get
+\begin{equation}\label{eq:62}
+    \left\{\begin{array}{l}
+        M(t) \quad \leftarrow M(t)+n S(t) \\
+        N(t) \quad \leftarrow N(t)-n  \quad \text { for } \quad n=\gamma N(t) .
+    \end{array}\right.
+\end{equation}
+Else we do nothing.
+
+
+
+\begin{figure}[!htbp]
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include first image
+        \includegraphics[width=\linewidth]{../code/img/q6_k_1.pdf}
+        \caption{Use best 1-day rule and Bayes detector.}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include second image
+        \includegraphics[width=\linewidth]{../code/img/q6_k_5.pdf}
+        \caption{Use best 5-day rule and Bayes detector.}
+    \end{subfigure}
+    \caption{}
+    \label{fig:q6}
+\end{figure}
+
+
+\section{Transaction Cost}\label{sec:7}
+
+Change Formula \ref{eq:61} and Formula \ref{eq:62} to the following equations to include transaction cost.
+\begin{equation}
+    \left\{\begin{array}{l}
+        M(t) \quad \leftarrow M(t)-m \\
+        N(t) \quad \leftarrow N(t)+(1-\xi)m / S(t) \quad \text { for } \quad m=\gamma M(t) .
+    \end{array}\right.
+\end{equation}
+\begin{equation}
+    \left\{\begin{array}{l}
+        M(t) \quad \leftarrow M(t)+(1-\xi)n S(t) \\
+        N(t) \quad \leftarrow N(t)-n  \quad \text { for } \quad n=\gamma N(t) .
+    \end{array}\right.
+\end{equation}
+where $\xi$ is the tax.
+
+
+
+\begin{figure}[!htbp]
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include first image
+        \includegraphics[width=\linewidth]{../code/img/q7_(xi=0).pdf}
+        % \caption{$\xi=0$, no tax.}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include second image
+        \includegraphics[width=\linewidth]{../code/img/q7_(xi=0.001).pdf}
+        % \caption{$\xi=0.001$}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include third image
+        \includegraphics[width=\linewidth]{../code/img/q7_(xi=0.002).pdf}
+        % \caption{}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include third image
+        \includegraphics[width=\linewidth]{../code/img/q7_(xi=0.005).pdf}
+        % \caption{}
+    \end{subfigure}
+    \caption{Portfolio's value with different transaction cost. The blue and orange curve used $k=1$ and $k=5$ respectively. The trade time of each cases is $k=1$: 493 and $k=5$: 20.}
+    \label{fig:q7}
+\end{figure}
+
+
+\section{Risk-Free Interest}\label{sec:8}
+
+\begin{equation}
+    M(t) \leftarrow M(t) \times (1+r)
+\end{equation}
+where $r$ is the risk-free interest rate.
+
+To compare the portfolio��s performance with benchmark value, we define the ratio
+\begin{equation}
+    \rho(t; r) \equiv \frac{V(t; r)}{V_b(t; r)}
+\end{equation}
+where $V_b(t; r)=M(0) \times(1+r)^t$ is the value of the portfolio if we do not trade at all.
+
+
+
+\begin{figure}[!htbp]
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include first image
+        \includegraphics[width=\linewidth]{../code/img/q8_(r=0).pdf}
+        % \caption{}
+        % \label{fig:}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include second image
+        \includegraphics[width=\linewidth]{../code/img/q8_(r=0.0001).pdf}
+        % \caption{}
+        % \label{fig:}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include first image
+        \includegraphics[width=\linewidth]{../code/img/q8_(r=1e-05).pdf}
+        % \caption{}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include second image
+        \includegraphics[width=\linewidth]{../code/img/q8_(r=5e-05).pdf}
+        % \caption{}
+    \end{subfigure}
+    \caption{}
+    \label{fig:q8}
+\end{figure}
+
+
+\section{Greed}\label{sec:9}
+
+
+
+\begin{figure}[!htbp]
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include first image
+        \includegraphics[width=\linewidth]{../code/img/q9_1.pdf}
+        \caption{Portfolio's value with different $\gamma$.}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        %		 include second image
+        \includegraphics[width=\linewidth]{../code/img/q9_2.pdf}
+        \caption{The effect of $\gamma$ to the final, highest and average value of portfolio.}
+    \end{subfigure}
+    \caption{ The effect of $\gamma$ to the portfolio's value across time and the final, highest and average value of portfolio.}
+    \label{fig:q9}
+\end{figure}
+
+
+\section{Efficient Frontier}\label{sec:10}
+% Right before transaction on day $t$, the portfolio's return amounts to $u=$ $A u_1+(1-A) u_2$, where $A=M(t) / V(t)$ is the proportion of money. If the signal of buying is observed, an investor spends $\widetilde{m}=\gamma_{\mathrm{U}} M(t)$ buying $(1-\xi) \widetilde{m} /$ $S(t)$ shares and changes $u$ to $u_{\mathrm{U}}=A_{\mathrm{U}} u_1+\left(1-A_{\mathrm{U}}\right) u_2$, tax rate is $\xi$. In contrast, if the signal of selling is observed, an investor sells $\tilde{n}=\gamma_{\mathrm{D}} N(t)$ shares to earn $(1-\xi) \tilde{n} S(t)$ and changes $u$ to $u_{\mathrm{D}}=A_{\mathrm{D}} u_1+\left(1-A_{\mathrm{D}}\right) u_2$. 
+% $V(t)=M(t)+N(t)S(t)$
+
+% Let $u$, $u_1$ and $u_2$ be the expected returns of the portfolio, $M(t)$ and $S(t)$. Before the transaction on day $t$, the portfolio's return amounts to $u = Au_1 + (1-A)u_2$, where $A=M(t)/V(t)$ is the proportion of money. 
+
+% If the signal of buying is observed, an investor spends $\tilde{m}=\gamma_U M(t)$ buying $(1-\xi)\tilde{m}/S(t)$ shares making the portfolio $V(t)$ decrease $\xi\gamma_U M(t)$ and changes $u$ to $u_U=A_U u_1 + (1-A_U)u_2$,
+
+% - Express $A_{\mathrm{U}}$ in terms of $\left\{\gamma_{\mathrm{U}}, V(t), M(t), \xi\right\}$ and $1-A_{\mathrm{D}}$ in terms of $\left\{\gamma_{\mathrm{D}}, V(t), N(t), S(t), \xi\right\}$
+% - Express $A_{\mathrm{U}} / A$ and $\left(1-A_{\mathrm{D}}\right) /(1-A)$ in terms of $\gamma$.
+% - Hence express $\gamma_{\mathrm{U}}$ in terms of $\{\gamma, V(t), M(t), \xi\}$ and $\gamma_{\mathrm{D}}$ in terms of $\{\gamma, V(t), N(t), S(t), \xi\}$
+
+
+This section investigate the efficient frontier of the portfolio by setting the greedy value $\gamma$ according to the market.
+
+Let $u$, $u_1$ and $u_2$ be the expected returns of the portfolio, $M(t)$ and $S(t)$. Before the transaction on day $t$, the portfolio's return amounts to $u = Au_1 + (1-A)u_2$, where $A=M(t)/V(t)$ is the proportion of money.
+
+\begin{enumerate}
+    \item If the signal of buying is observed, an investor spends $\tilde{m}=\gamma_U M(t)$ buying $(1-\xi)\tilde{m}/S(t)$ shares and changes $u$ to $u_U=A_U u_1 + (1-A_U)u_2$. We have
+\begin{align}
+    M_U(t)&=M(t)-\tilde{m}=M-\gamma_U M(t)\\
+    N_U(t)&=N(t)+\frac{\tilde{m}(1-\xi)}{S(t)}=N(t)+\frac{\gamma_U M(t)(1-\xi)}{S(t)}\\
+    V_U(t)&=M(t)-\tilde{m}+\left( N(t)+\frac{\tilde{m}(1-\xi)}{S(t)} \right) S(t)=V(t)-\xi\gamma_U M(t),
+\end{align}
+and
+\begin{align}
+    u&=\frac{V_U(t)}{V(t)}=1-\frac{\xi\gamma_U M(t)}{V(t)}\\
+    u_1&=\frac{M_U(t)}{M(t)}=1-\gamma_U\\
+    u_2&=\frac{N_U(t)}{N(t)}=1+\frac{\gamma_U(1-\xi)M(t)}{N(t)S(t)}.
+\end{align}
+
+Then, we can express $A_U$ in terms of $\left\{\gamma_U, V(t), M(t), \xi\right\}$ as
+\begin{equation}\label{eq:au}
+    A_U=\frac{M_U(t)}{V_U(t)}=\frac{M(t)\left( 1-\gamma_U \right) }{V(t)-\xi\gamma_U M(t)}.
+\end{equation}
+
+Similarly, if the signal of selling is observed, an investor sells $\tilde{n}=\gamma_D N(t)$ shares to earn $(1-\xi)\tilde{n}S(t)$ and changes $u$ to $u_D=A_D u_1 + (1-A_D)u_2$. We have
+\begin{align}
+    M_D(t)&=M(t)+\tilde{n}(1-\xi)S(t)=M(t)+\gamma_D(1-\xi) N(t)S(t)\\
+    N_D(t)&=N(t)-\tilde{n}=N(t)-\gamma_D N(t)\\
+    V_D(t)&=M_D(t)+N_D(t)S(t)=V(t)-\gamma_D\xi N(t)S(t),
+\end{align}
+and
+\begin{align}
+    u&=\frac{V_D(t)}{V(t)}=1-\frac{\gamma_D\xi N(t)S(t)}{V(t)}\\
+    u_1&=\frac{M_D(t)}{M(t)}=1+\frac{\gamma_D(1-\xi) N(t)S(t)}{M(t)}\\
+    u_2&=\frac{N_D(t)}{N(t)}=1-\gamma_D.
+\end{align}
+    
+Then, we can express $1-A_D$ in terms of $\left\{\gamma_D, V(t), N(t), S(t), \xi\right\}$ as
+\begin{equation}\label{eq:ad}
+    1-A_D=\frac{N_D(t)S(t)}{V_D(t)}=\frac{N(t)S(t)\left( 1-\gamma_D \right) }{V(t)-\xi\gamma_D N(t) S(t)}.
+\end{equation}
+
+\item Then, model $u_U=\gamma(u_2-u)+u$, where $u = Au_1 + (1-A)u_2$ and $u_U = A_U u_1 + (1-A_U)u_2$. We have
+\begin{align}
+    \gamma&=\frac{A_U u_1+(1-A_U)u_2-u}{u_2-u}\\
+    &=1+\frac{A_U(u_1-u_2)}{u_2-u}\\
+    \Rightarrow& \frac{A_U}{A}=1-\gamma.\label{eq:au/a}
+\end{align}
+
+Similarly, model $u_D=\gamma(u_1-u)+u$, where $u = Au_1 + (1-A)u_2$ and $u_D = A_D u_1 + (1-A_D)u_2$. We have
+\begin{align}
+    \gamma&=\frac{A_D u_1+(1-A_D)u_2-u}{u_1-u}\\
+    &=1+\frac{(1-A_D)(u_2-u_1)}{u_1-Au_1 - (1-A)u_2}\\
+    &=1+\frac{(1-A_D)(u_2-u_1)}{(u_1-u_2)(1-A)}\\
+    \Rightarrow& \frac{1-A_D}{1-A}=1-\gamma.\label{eq:ad/a}
+\end{align}
+
+\item Using Formula \ref{eq:au} and Formula \ref{eq:au/a}, we have
+\begin{align}
+    \frac{A_U}{A}&=\frac{M(t)(1-\gamma_U)}{\left( V(t)-\xi\gamma_U M(t) \right)} \frac{V(t)}{M(t)}=1-\gamma\\
+    \Rightarrow & \gamma_U=\frac{\gamma V(t)}{V(t)+(\gamma-1)\xi M(t)}.
+\end{align}
+
+Similarly, using Formula \ref{eq:ad} and Formula \ref{eq:ad/a}, we have
+\begin{align}
+    \frac{1-A_D}{1-A}&=\frac{N(t)S(t)(1-\gamma_D)}{\left( V(t)-\xi\gamma_D N(t)S(t) \right)} \frac{V(t)}{N(t)S(t)}=1-\gamma\\
+    \Rightarrow & \gamma_D=\frac{\gamma V(t)}{V(t)+(\gamma-1)\xi N(t)S(t)}.
+\end{align}
+
+\item 
+\begin{figure}[!htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../code/img/q10.pdf}
+    \end{center}
+    \caption{}
+    \label{fig:q10}
+\end{figure}
+\end{enumerate}
+
+\section{Adaptive Greed}\label{sec:11}
+$\gamma_i^*=\underset{\gamma}{\operatorname{argmax}}\left[\frac{V\left(t_i ; \gamma\right)}{V\left(t_i-1 ; \gamma\right)}\right]$ be the optimal $\gamma$ at time $t_i$. 
+
+
+
+\begin{figure}[!htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../code/img/q11_1.pdf}
+    \end{center}
+    \caption{Visualization of portfolio's value with different $\gamma$ and $\gamma^*$. The black point is the selected $\gamma^*$ at time $t$.}
+    \label{fig:q11-1}
+\end{figure}
+
+
+\begin{equation}
+    R[t]=\frac{V_A[t]-V_A[t-k]}{V_C[t]-V_C[t-k]}\frac{V_C[t]}{V_A[t]}.
+\end{equation}
+
+Then, Bob's $\gamma_B$ of time $t$ is
+\begin{equation}
+    \gamma_B[t] =
+    \left\{\begin{array}{ll}
+        \gamma_A, & \text{if}\quad R[t]>1 \\
+        \gamma_C & else.
+    \end{array}\right.
+\end{equation}
+
+
+
+\begin{figure}[!htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{../code/img/q11_2.pdf}
+    \end{center}
+    \caption{The portfolio's value of Alice, Bob and Charlie as well as the chosen $\gamma_B$. The red point is the selected $\gamma_B$ at time $t$.}
+    \label{fig:q11-2}
+\end{figure}
+
+\newpage
+\bibliographystyle{splncs04}
+\bibliography{refs}
+
+\section*{Acknowledgements} I really appeciate JIANG Wenxin for finishing the work from question 1-5 and 11.2. 
+She is highly motivated, so she couldn't wait me to work on question 11.2 and finished code of q11.2 on her own. \\
+Meanwhile, I also have to thank Github-Copilot for assisting me to write this latex report.
+% \section*{Appendix}
+% \lstinputlisting[caption=Codes of the Analysis, label={codes}, language=Python]{./codes.py}
+\end{document}
