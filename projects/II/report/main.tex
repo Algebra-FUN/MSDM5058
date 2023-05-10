@@ -3,61 +3,65 @@
 \usepackage{graphicx}
 \usepackage{color}
 \usepackage{subcaption}
-\usepackage{listings}
 \usepackage[lighttt]{lmodern}
-\usepackage{url}
-\usepackage[colorlinks=true]{hyperref}
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{amsmath}
-% Define a custom color
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-\definecolor{codegreen}{rgb}{0,0.6,0}
+
 
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
 \begin{document}
-\title{MSDM5058 Information Science\\
-    Computational Project II:\\
+\title{MSDM5058 Project II:\\
     Portfolio Management Using Prediction Rules\\
     and Communication in Social Networks}
-\titlerunning{MSDM5058 Project II}
-\author{Yifei Fan}
-\authorrunning{Y. Fan}
-\institute{HKUST, Hong Kong SAR, China\\
-    \email{\href{yfanba@ust.hk}{yfanba@ust.hk}}}
-\maketitle
-
+%
+\titlerunning{MSDM5058 Information Science}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{FAN Yifei}
+%
+\authorrunning{Y. FAN}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{HKUST, Hong Kong SAR, China \\\href{mailto:yfanba@ust.hk}{yfanba@ust.hk}}
+%
+\maketitle              % typeset the header of the contribution
+%
 \begin{abstract}
-    In this project, we applied prediction rules and communication in social networks carry out portfolio management and financial data mining.
-    We first downloaded the data and preprocessed the data.
+    In this project, I just follow the instruction of this step-by-step big homework with my teammate. And I am too tired to write abstract for this report.\\
     The code of this project is available at \url{https://lucajiang.github.io/MSDM5058Proj2/}.
-    \keywords{Prediction Rules \and Communication in Social Networks \and Portfolio Management.}
 \end{abstract}
-
 
 \section{Data Preprocessing}\label{sec:1}
 
 In this project, we downloaded the data of
 daily closing price of the time series of "GOOGL"~\cite{goolge}
-started from 2007-01-01 to 2023-04-10 from Yahoo Finance
-using yfinance~\cite{yfinance} package.
-\subsection{Compute log return}
-In order to make the data more suitable for financial data mining,
-we first computed the log return of the closing price of each stock.
+started from 2007-01-01 to 2023-04-10 from Yahoo Finance with the help of "yfinance"\cite{yfinance} package in python.
 
-Let time start at $t = 0$. Denote the stock's time series by $S(t)$, then compute its daily log return $X(t)$ with
+\subsection{Daily Log Return}
+
+We use its closing-price time series $S(t)$ to calculate the daily return $X(t)$, which is defined as
 
 \begin{equation}
     X(t)=\ln \left[\frac{S(t)}{S(t-1)}\right].
 \end{equation}
 
+The daily return time series is shown in Fig.~\ref{fig:q1sx}.
+
 \begin{figure}[!htbp]
     \begin{center}
         \includegraphics[width=0.8\textwidth]{../code/img/q1_SX.pdf}
     \end{center}
-    \caption{}
+    \caption{Daily return time series.}
     \label{fig:q1sx}
 \end{figure}
+
+\subsection{ACF and PACF}
+
+We also plot the auto-correlation function and partial auto-correlation function of the daily return in Fig.~\ref{fig:q1acf}.
 
 \begin{figure}[!htbp]
     \begin{subfigure}[t]{0.49\textwidth}
@@ -76,6 +80,15 @@ Let time start at $t = 0$. Denote the stock's time series by $S(t)$, then comput
     \label{fig:q1acf}
 \end{figure}
 
+\subsection{ADF Test}
+
+We perform the augmented Dickey-Fuller test on the daily return time series.
+
+The p-value of ADF test is 0.000000, which is less than 0.05. Therefore, we can reject the null hypothesis that the time series is non-stationary.
+
+\subsection{Digitization}
+
+Digitize $X(t)$ as $Y(t)$ with three alphabets, viz. D for “down”, U for “up”, and H for “hold”. We need to choose a sensible value for the positive constant $\varepsilon$.
 
 \begin{align}
     Y(t)=\left\{
@@ -109,30 +122,78 @@ In this section, we plot the conditional CDF of $X$ given that $Y$ will become U
 
 \section{Probability Density Function}\label{sec:3}
 
+We fit $F_U(x)$ and $F_D(x)$ with a logistic function, which is defined as
+
+\begin{equation}
+    L(x)=\frac{1}{1+e^{-b(x-x^*)}},
+\end{equation}
+where $x^*$ is the inflection point and $b$ is the slope. The fitted result is shown in Fig.~\ref{fig:q3ld}.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{../code/img/q3_ld.pdf}
+    \end{center}
+    \caption{Density plot of conditional PDFs}
+    \label{fig:q3ld}
+\end{figure}
+
+We estimate the density function $f_U(x)$ and $f_D(x)$ with a gaussian function, which is defined as
+\begin{equation}
+    G(x)=\frac{1}{\sigma \sqrt{2 \pi}} \exp \left[-\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right],
+\end{equation}
+where $\mu$ is the mean and $\sigma$ is the standard deviation.
+
+The fitted result is shown in Fig.~\ref{fig:q3dist}.
 
 \begin{figure}[!htb]
     \begin{center}
         \includegraphics[width=0.6\textwidth]{../code/img/q3_dist.pdf}
     \end{center}
     \caption{Density plot of conditional PDFs}
-    \label{fig:q3}
+    \label{fig:q3dist}
 \end{figure}
-
-The logistic function is defined as
-\begin{equation}
-    L(x)=\frac{1}{1+e^{-b(x-x^*)}},
-\end{equation}
-where $x^*$ is the inflection point and $b$ is the slope. The gaussian function is defined as
-\begin{equation}
-    G(x)=\frac{1}{\sigma \sqrt{2 \pi}} \exp \left[-\frac{(x-\mu)^{2}}{2 \sigma^{2}}\right],
-\end{equation}
-where $\mu$ is the mean and $\sigma$ is the standard deviation.
-
-
 
 
 \section{Bayes Detector}\label{sec:4}
 
+We now construct a Bayes detector with the PDFs to predict $Y(t + 1)$ after observing $X(t)$. 
+Formally, we need to choose between two hypotheses “$H_U: Y(t+1)=U$”and“$H_D: Y(t+1)=D$”.
+
+The Bayes detector for this case can be descirbed as
+
+\begin{equation}
+    \label{eq:bayes}
+    \eta=\frac{P(Y=U|x)}{P(Y=D|x)}=\frac{p(x|Y=U)P(Y=U)}{p(x|Y=D)P(Y=D)}.
+\end{equation}
+
+when $\eta > 1$, we choose $H_U$; when $\eta < 1$, we choose $H_D$.
+
+In order to compute $\eta$, we compute the probabilities $P[Y(t+1)=U]$ and $P[Y(t+1)=D]$ from the training data. 
+The result of $P[Y(t+1)=U]\approx 0.42609$ and $P[Y(t+1)=D]\approx 0.37600$.
+
+\subsection{Logistic Detector}
+
+To construct the logistic detector, we replace the $p(x|Y)$ with $L^{'}(x;Y)$ in Eq.~\eqref{eq:bayes}, where $L^{'}(x;Y)$ is the derivative of the logistic function with respect to $x$.
+Then we get this equation,
+
+\begin{equation}
+    \label{eq:bayes-logistic}
+    \eta_L=\frac{P(Y=U|x)}{P(Y=D|x)}=\frac{L^{'}_U(x)P(Y=U)}{L^{'}_D(x)P(Y=D)}.
+\end{equation}
+
+Then solve $\eta_L > 1$, we can get the threshold $x^*$, which is shown in Fig.~\ref{fig:q4_ld}.
+
+\subsection{Gaussian Detector}
+
+Similarly, to construct the gaussian detector, we replace the $p(x|Y)$ with $g(x;Y)$ in Eq.~\eqref{eq:bayes}, where $g(x;Y)$ is the derivative of the gaussian function with respect to $x$.
+Then we get this equation,
+
+\begin{equation}
+    \label{eq:bayes-gaussian}
+    \eta_G=\frac{P(Y=U|x)}{P(Y=D|x)}=\frac{g_U(x)P(Y=U)}{g_D(x)P(Y=D)}.
+\end{equation}
+
+Then solve $\eta_G > 1$, we can get the threshold $x^*$, which is shown in Fig.~\ref{fig:q4_gau}.
 
 \begin{figure}[!htbp]
     \begin{subfigure}[t]{0.49\textwidth}
@@ -140,12 +201,14 @@ where $\mu$ is the mean and $\sigma$ is the standard deviation.
         %		 include first image
         \includegraphics[width=\linewidth]{../code/img/q4_ld.pdf}
         \caption{Logistic function}
+        \label{fig:q4_ld}
     \end{subfigure}
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         %		 include second image
         \includegraphics[width=\linewidth]{../code/img/q4_gau.pdf}
         \caption{Gaussian function}
+        \label{fig:q4_gau}
     \end{subfigure}
     \caption{Bayes detector with different conditional PDFs. The red vertical line is the threshold.}
     \label{fig:q4}
@@ -154,10 +217,17 @@ where $\mu$ is the mean and $\sigma$ is the standard deviation.
 
 \section{Association Rules}\label{sec:5}
 
+Although we can always follow the Bayes detector and trade accordingly, we will trade too frequently and lose a lot due to transaction costs. Therefore, we impose extra association rules to limit the frequency of trading: we will trade only after both the detector and the rules recommend us doing so.
 
+The general form of a $k$-day rule is
+\begin{equation}
+    \label{eq:rule}
+    R_y^k=\{Y(t),Y(t-1),\cdots,Y(t-k+1)\}\rightarrow Y(t+1)=y.
+\end{equation}
 
+We decided to assess a rule by confidence, whose defination is similar with the defination in Project I.
 
-The result is shown in Table~\ref{tab:5}.
+The best result of 1-day and 5-day rule is shown in Table~\ref{tab:5}.
 \begin{table}[!htbp]
     \centering
     \caption{Best Association Rules}
@@ -170,30 +240,40 @@ The result is shown in Table~\ref{tab:5}.
     \end{tabular}
 \end{table}
 
-
 \section{Portfolio Management}\label{sec:6}
+
+It is time for us to invest in the stock to see if the Bayes detectors and associa- tion rules really work. (Remember to switch to the future data.)
+Let $M(t)$ be the amount of our money and $N(t)$ the number of our shares at the end of day $t$. As it comprises money and the stock only, our portfolio's value is defined as
 
 \begin{equation}
     V(t)=M(t)+N(t)S(t).
 \end{equation}
 
+We are initially given $M(0) = 100,000$ units (in whatever currency that de- scribes our data) and $N(0) = 0$ shares, then you start trading at $t = 1$ according to the following rules.
+
 If Bayes detector predicts $Y(t+1)$ is U and the antecedent of the best $k$-day upward rule $R_U$ occurs on day $t$, we buy shares to get
 \begin{equation}\label{eq:61}
-    \left\{\begin{array}{l}
-        M(t) \quad \leftarrow M(t)-m \\
-        N(t) \quad \leftarrow N(t)+m / S(t) \quad \text { for } \quad m=\gamma M(t) .
-    \end{array}\right.
+    \begin{cases}
+        M(t) &\leftarrow M(t)-m \\
+        N(t) &\leftarrow N(t)+m / S(t)
+    \end{cases}
+    \text { for } \quad n=\gamma N(t) .
 \end{equation}
 Else if Bayes detector predicts $Y(t+1)$ is D and the antecedent of the best $k$-day downward rule $R_D$ occurs on day $t$, we sell shares to get
 \begin{equation}\label{eq:62}
-    \left\{\begin{array}{l}
-        M(t) \quad \leftarrow M(t)+n S(t) \\
-        N(t) \quad \leftarrow N(t)-n  \quad \text { for } \quad n=\gamma N(t) .
-    \end{array}\right.
+    \begin{cases}
+        M(t) &\leftarrow M(t)+n S(t) \\
+        N(t) &\leftarrow N(t)-n
+    \end{cases}
+    \text { for } \quad n=\gamma N(t) .
 \end{equation}
-Else we do nothing.
 
+For simplicity, let us assume $M(t)$ and $N(t)$ are real numbers with infinite precision, meaning that we do not have any smallest units per transaction. (This is an absurd assumption.) Note that this market model has also unrealistically assumed a stock’s closing price on a day to be its price on the entire day and restricted you to trade at most once per day.
+First compare the performances of the two Bayes detectors obtained in Section 4. Consider $k = 1$ and $\gamma = \gamma_0$ for any value.
 
+In this project, we use $\gamma_0=0.01$
+
+Trade with logistic detector and gaussian detector with $k=1,5$.The results are shown in Fig.~\ref{fig:q6}.
 
 \begin{figure}[!htbp]
     \begin{subfigure}[t]{0.49\textwidth}
@@ -212,25 +292,35 @@ Else we do nothing.
     \label{fig:q6}
 \end{figure}
 
+From the Fig.~\ref{fig:q6}, we can see that the gaussian detector with $k=1$ performs better than other detectors.
+
+It sounds strange that the detectors with 1-day rule performs better than the detectors with 5-day rule. 
+We think it is because the 5-day rules are too strict since they rarely occur than the 1-day rules.
+
+In the following sections, we will use the gaussian detector.
 
 \section{Transaction Cost}\label{sec:7}
 
+In this section, we investigate the effect of transaction cost.
+
 Change Formula \ref{eq:61} and Formula \ref{eq:62} to the following equations to include transaction cost.
 \begin{equation}
-    \left\{\begin{array}{l}
-        M(t) \quad \leftarrow M(t)-m \\
-        N(t) \quad \leftarrow N(t)+(1-\xi)m / S(t) \quad \text { for } \quad m=\gamma M(t) .
-    \end{array}\right.
+    \begin{cases}
+        M(t) &\leftarrow M(t)-m \\
+        N(t) &\leftarrow N(t)+(1-\xi)m / S(t)
+    \end{cases}
+    \text { for } \quad m=\gamma M(t).
 \end{equation}
 \begin{equation}
-    \left\{\begin{array}{l}
-        M(t) \quad \leftarrow M(t)+(1-\xi)n S(t) \\
-        N(t) \quad \leftarrow N(t)-n  \quad \text { for } \quad n=\gamma N(t) .
-    \end{array}\right.
+    \begin{cases}
+        M(t) &\leftarrow M(t)+(1-\xi)n S(t) \\
+        N(t) &\leftarrow N(t)-n
+    \end{cases}
+    \text { for } \quad n=\gamma N(t) . 
 \end{equation}
 where $\xi$ is the tax.
 
-
+We repeat the experiment with different $\xi$, the results are shown in Fig.~\ref{fig:q7}.
 
 \begin{figure}[!htbp]
     \begin{subfigure}[t]{0.49\textwidth}
@@ -262,20 +352,28 @@ where $\xi$ is the tax.
     \label{fig:q7}
 \end{figure}
 
+From the Fig.~\ref{fig:q7},  we can see the gaussian detector with $k=1$ performs better than other detectors.
+
+Thus, in following sections, we will use the gaussian detector with $k=1$.
 
 \section{Risk-Free Interest}\label{sec:8}
+
+In this section, we investigate the effect of risk-free interest rate $r$ on the portfolio's value. Consider $r = 0.001$\% with $\xi = 0.2$\% and $\gamma = \gamma_0$.
+
+Further assume that $M(t)$ grows without risk because you have deposited your money in a bank. Hence, at the beginning of every day, first update
 
 \begin{equation}
     M(t) \leftarrow M(t) \times (1+r)
 \end{equation}
 where $r$ is the risk-free interest rate.
 
-To compare the portfolio��s performance with benchmark value, we define the ratio
+To compare the portfolio's performance with benchmark value, we define the ratio
 \begin{equation}
     \rho(t; r) \equiv \frac{V(t; r)}{V_b(t; r)}
 \end{equation}
 where $V_b(t; r)=M(0) \times(1+r)^t$ is the value of the portfolio if we do not trade at all.
 
+Repeat the experiment with different $r$, the results are shown in Fig.~\ref{fig:q8}.
 
 
 \begin{figure}[!htbp]
@@ -310,10 +408,13 @@ where $V_b(t; r)=M(0) \times(1+r)^t$ is the value of the portfolio if we do not 
     \label{fig:q8}
 \end{figure}
 
+From the Fig.~\ref{fig:q8}, we can see that when $r$ becomes smaller, the $\rho(t;r)$ becomes smaller. 
 
 \section{Greed}\label{sec:9}
 
+In this section, we investigate the effect of $\gamma$. Consider $\xi$ = 0.2\% and $r = 0.001$\%.
 
+Repeat experiment with different $\gamma$, the results are shown in Fig.~\ref{fig:q9}.
 
 \begin{figure}[!htbp]
     \begin{subfigure}[t]{0.49\textwidth}
@@ -331,6 +432,10 @@ where $V_b(t; r)=M(0) \times(1+r)^t$ is the value of the portfolio if we do not 
     \caption{ The effect of $\gamma$ to the portfolio's value across time and the final, highest and average value of portfolio.}
     \label{fig:q9}
 \end{figure}
+
+From the Fig.~\ref{fig:q9}, we can see that $V(\max{t};\gamma), \max_t{V(t;\gamma)}$ and $\bar{V}(t;\gamma)$ are all increasing with $\gamma$ when gamma is smaller than $0.2$.
+And $V(\max{t};\gamma), \max_t{V(t;\gamma)}$ and $\bar{V}(t;\gamma)$ are all decreasing with $\gamma$ when gamma is bigger than $0.2$.
+This result means that suitable greed can improve the performance of portfolio, but too much greed will decrease the performance of portfolio.
 
 
 \section{Efficient Frontier}\label{sec:10}
@@ -424,9 +529,28 @@ Similarly, using Formula \ref{eq:ad} and Formula \ref{eq:ad/a}, we have
 \end{figure}
 \end{enumerate}
 
-\section{Adaptive Greed}\label{sec:11}
-$\gamma_i^*=\underset{\gamma}{\operatorname{argmax}}\left[\frac{V\left(t_i ; \gamma\right)}{V\left(t_i-1 ; \gamma\right)}\right]$ be the optimal $\gamma$ at time $t_i$. 
+We carry out the experiment with $\tilde{m}$ and $\tilde{n}$, the result is shown in Fig. \ref{fig:q10}.
+Since the tax $\xi$ is very heavy and our trade algorithm doesn't change buying and selling point in test dataset, every trade will lost money.
+You should blame on the designer of this project for this bad result, not me.
 
+\section{Adaptive Greed}\label{sec:11}
+
+We have been so far using a constant greed throughout trading. In this section, we are going to investigate an adaptive greed that responds to the market.
+
+\subsection{Posterior analysis}
+We have obtained twenty portfolios for twenty choices of $\gamma$ in Section 9.
+
+The optimal $\gamma^*$ can be defined as
+
+\begin{equation}
+\gamma_i^*=\underset{\gamma}{\operatorname{argmax}}\left[\frac{V\left(t_i ; \gamma\right)}{V\left(t_i-1 ; \gamma\right)}\right] 
+\end{equation}
+
+where $\gamma_i^*$ be the optimal $\gamma$ at time $t_i$.
+
+The $\gamma^*$ can be seen in Fig. \ref{fig:q11-1}.
+
+We trade with $\gamma_i=\gamma_i^*$ and get resultant portfolio's value $V^*(t)$, which is shown in Fig. \ref{fig:q11-1}.
 
 
 \begin{figure}[!htbp]
@@ -437,21 +561,40 @@ $\gamma_i^*=\underset{\gamma}{\operatorname{argmax}}\left[\frac{V\left(t_i ; \ga
     \label{fig:q11-1}
 \end{figure}
 
+\subsection{Prior analysis}
+
+Alice's greed is $\gamma_A = 0.7$, and Charlie's greed is $\gamma_C$ = 0.3. 
+Bob wants to strike a balance between them, so he lets we choose when to invest with $\gamma_B = \gamma_A$ and 
+when to invest with $\gamma_B = \gamma_C$. 
+\paragraph{Our method to vary Bob's greed $\gamma_B$}
+
+The idea is to compare the return of Alice and Charlie in the past $k$ days.
+
+First we define the return of Alice and Charlie at time $t$ as
 
 \begin{equation}
-    R[t]=\frac{V_A[t]-V_A[t-k]}{V_C[t]-V_C[t-k]}\frac{V_C[t]}{V_A[t]}.
+    R_A^k[t]=\frac{V_A[t]-V_A[t-k]}{V_A[t-k]},\quad R_C^k[t]=\frac{V_C[t]-V_C[t-k]}{V_C[t-k]}.
 \end{equation}
 
-Then, Bob's $\gamma_B$ of time $t$ is
+Then we compare the return of Alice and Charlie at time $t$ by the ratio of their return
+
+\begin{equation}
+    \eta^k[t]=\frac{R_A[t]}{R_C[t]}.
+\end{equation}
+
+If $\eta^k[t]>1$, then Alice's return is higher than Charlie's return, so we choose $\gamma_B=\gamma_A$.
+If $\eta^k[t]<1$, then Charlie's return is higher than Alice's return, so we choose $\gamma_B=\gamma_C$.
+This simple greedy selection rule can be written as 
+
 \begin{equation}
     \gamma_B[t] =
-    \left\{\begin{array}{ll}
-        \gamma_A, & \text{if}\quad R[t]>1 \\
-        \gamma_C & else.
-    \end{array}\right.
+    \begin{cases}
+        \gamma_A, & \eta^k[t]>1, \\
+        \gamma_C, & else.
+    \end{cases}
 \end{equation}
 
-
+Then we can get the portfolio's value $V_B[t]$ of Bob with $\gamma_B[t]$ at time $t$ with experiment, the result is shown in Fig. \ref{fig:q11-2}.
 
 \begin{figure}[!htbp]
     \begin{center}
@@ -461,13 +604,15 @@ Then, Bob's $\gamma_B$ of time $t$ is
     \label{fig:q11-2}
 \end{figure}
 
+From the Fig. \ref{fig:q11-2}, we can see that the portfolio's value of Bob is higher than Alice and similar with Charlie most time, even sometime higher than Charlie, which means our method is effective.
+
 \newpage
 \bibliographystyle{splncs04}
 \bibliography{refs}
 
-\section*{Acknowledgements} I really appeciate JIANG Wenxin for finishing the work from question 1-5 and 11.2. 
-She is highly motivated, so she couldn't wait me to work on question 11.2 and finished code of q11.2 on her own. \\
-Meanwhile, I also have to thank Github-Copilot for assisting me to write this latex report.
-% \section*{Appendix}
-% \lstinputlisting[caption=Codes of the Analysis, label={codes}, language=Python]{./codes.py}
+\subsection*{Acknowledgements} 
+
+Thanks to JIANG Wenxin for finishing the codes from question 1-5 and question 11-2.
+She is a very good partner. She is very motivated, couldn't wait for me to discuss the open question 11-2 and finished it alone.
+
 \end{document}
