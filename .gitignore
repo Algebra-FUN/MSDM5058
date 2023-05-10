@@ -4,4 +4,6 @@
 *.pdf
 *.gz
 *.out
+*.bbl
+*.blg
 .ipynb_checkpoints
